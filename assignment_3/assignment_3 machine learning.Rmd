@@ -1,0 +1,83 @@
+---
+title: "assignment 3"
+author: "vineeth goud maddi"
+date: "3/5/2022"
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r}
+library(reshape2)
+library(gmodels)
+library(caret)
+library(ISLR)
+```
+
+
+```{r}
+library(e1071)
+ubank <- read.csv("./UniversalBank.csv")
+ubank$Personal.Loan <-factor(ubank$Personal.Loan)
+ubank$Online<-factor(ubank$Online)
+ubank$CreditCard<-factor(ubank$CreditCard)
+df = ubank
+#A. pivot table for the training data with Online as a column variable, 
+#CC as a row variable, and Loan as a secondary row variable
+set.seed(64060)
+train.index <- createDataPartition(df$Personal.Loan, p= 0.6, list = FALSE)
+train.df <-df[train.index,]
+validation.df <- df[-train.index,]
+mytable <- xtabs(~ CreditCard + Online + Personal.Loan, data = train.df)
+ftable(mytable)
+
+#B. probability of loan acceptance (Loan = 1) conditional on 
+#having a bank credit card (CC = 1) and being an active user of online banking services 
+#(Online = 1)]
+Probability = (59/(59+479))
+Probability
+
+#C. Creating two separate pivot tables for the training data
+table(Personal.Loan= train.df$Personal.Loan, Online = train.df$Online)
+table(Personal.Loan= train.df$Personal.Loan, CreditCard = train.df$CreditCard)
+table(Personal.Loan = train.df$Personal.Loan)
+
+#D.[P(A | B) means “the probability ofA given B”]
+#Probability_1
+Probability1 = (93/(93+195))
+Probability1
+#probability_2
+Probability2 = (179/(179+109))
+Probability2
+#Probability_3
+Probability3 = (288/(288+2712))
+Probability3
+#Probability_4
+Probability4 = (788/(788+1924))
+Probability4
+#Probability_5
+Probability5 = (1631/(1631+1081))
+Probability5
+#Probability_6
+Probability6 = (2712/(2712+288))
+Probability6
+
+#E naive Bayes probability P(Loan = 1 | CC = 1,online = 1)
+
+naivebayesprobab <-(0.32*0.62*0.09)/(0.32*0.62*0.09 + 0.29*0.60*0.90)
+naivebayesprobab
+
+#F. compare the value one obtained from the pivot table in (B)
+
+#Pivot table probability = 0.10
+#Naive bayes probability = 0.10
+#The key assumption we make while using naive bayes is that all variables are independent and have equal relevance, hence we can see that naive bayes probablity is low.
+
+#G. Run naive Bayes on the data. Examine the model output on training data, 
+#find the entry that corresponds to P(Loan = 1 | CC = 1, Online = 1)
+nb.model<-naiveBayes(Personal.Loan~ Online+CreditCard, data = train.df)
+To_Predict=data.frame(Online=1, CreditCard=1)
+predict(nb.model, To_Predict,type = 'raw')
+```
+
+
+
