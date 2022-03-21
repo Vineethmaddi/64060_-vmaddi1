@@ -1,0 +1,77 @@
+---
+title: "assignment 4"
+author: "vineeth goud maddi"
+date: "3/14/2022"
+output:
+  html_document:
+    df_print: paged
+---
+```{r}
+library(ggplot2)
+library(factoextra)
+library(tidyverse)
+library(ISLR)
+library(cluster)
+```
+```{r}
+pharmacy <- read.csv("./Pharmaceuticals.csv")
+#task1
+x <-na.omit(pharmacy)
+summary(pharmacy)
+row.names(x) <- x[,1]
+pharma <- x[,3:11]
+head(pharma)
+pharma1 <- scale(pharma)
+head(pharma1)
+fviz_nbclust(pharma1, kmeans, method = "wss") + labs(subtitle = "Elbow Method") 
+fviz_nbclust(pharma1, kmeans, method = "silhouette")+ labs(subtitle = "Silhouette Method")  
+
+set.seed(64060)
+k5 <-kmeans(pharma1,centers = 5, nstart = 25)
+k5$centers
+fviz_cluster(k5, data = pharma1)
+distance <-dist(pharma1, method = "euclidean")
+fviz_dist(distance)
+
+fit <- kmeans(pharma1, 5)
+aggregate(pharma1, by=list(fit$cluster), FUN=mean)
+pharma2 <-data.frame(pharma1, fit$cluster)
+pharma2
+
+clusplot(pharma1, fit$cluster, color = TRUE, shade = TRUE, labels = 2, lines = 0)
+
+#Interpret the clusters with respect to the numerical variables used in forming the clusters.
+
+#cluster_1 : JNJ, MRK, GSK, PFE
+#cluster_2 : AVE, AHM, WPI
+#cluster_3 : CHTT, ELN, MRX, IVX
+#cluster_4 : AGN, PHA, BAY
+#cluster_5 : WYE, BMY, AZN, ABT, NVS, SGP, LLY
+
+#cluster_3 has highest beta,leverage, asset turnover ratio and lowest market 
+#cluster_4 has lowest leverage,asset turnover and highest PE ratio
+#cluster_5 has lowest leverage and highest market
+
+#c. Is there a pattern in the clusters with respect to the numerical variables (10 to 12)? 
+#(those not used in forming the clusters) 
+
+#Each cluster was manually filtered to detect patterns in media recomendations, location and exchange
+#cluster_1 has the moderate stocks in character which means they are not weak nor have a good recent gain
+#cluster_2 stocks are well balanced, their principles are sound technically and  media recommendations are high
+#cluster_3 : despite their high leverage ratio they are moderately recommended due to their financial stability
+#cluster_4 as per media recomendations these stocks have hold recomdations. they will good stocks in short term
+#cluster_5 these stocks need some time they will become good stocks in the longterm
+
+#d. Provide an appropriate name for each cluster using any or all of the variables in the dataset. 
+#cluster_1 : Best Buying Cluster
+#cluster_2 : Confusion Cluster
+#cluster_3 : Moderate Buying Cluster
+#cluster_4 : Highly Risky Cluster
+#cluster_5 : Pause Cluster
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
