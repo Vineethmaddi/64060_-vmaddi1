@@ -1,0 +1,89 @@
+---
+title: "assignment 5"
+author: "vineeth goud maddi"
+date: "4/15/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(readr)
+View(Cereals)
+library(cluster)
+library(caret)
+library(dendextend)
+library(factoextra)
+
+```
+data importing cereals dataset
+```{r}
+data.frame <-data.frame(Cereals[,4:16])
+```
+data processing. removing the missing values that might present in the data
+```{r}
+removed_missingvalue <- na.omit(data.frame)
+#Data normalization and data scaling
+Normalize <- scale(removed_missingvalue)
+```
+using the euclidean distance to measure the distance
+```{r}
+d <- dist(Normalize, method = "euclidean")
+#perform hierarchical clustering using complete linkage.
+Hc <- hclust(d, method = "complete")
+plot(Hc)
+#dendogram
+round(Hc$height, 3)
+```
+Determining Optimal clusters:
+highliting the clusters in dendogram directly.
+```{r}
+plot(Hc)
+rect.hclust(Hc,k = 4, border = "orange")
+```
+We can also use agnes() function to perform clustering.
+Performing clustering using agnes() with single, complete, average and ward.
+```{r}
+Hcsingle  <- agnes(Normalize, method = "single")
+Hccomplete <-agnes(Normalize, method = "complete")
+Hcaverage <-agnes(Normalize, method = "average")
+Hcward <- agnes(Normalize, method = "ward")
+```
+Compare the agglomerative coefficients for single,complete,average and ward.
+```{r}
+print(Hcsingle$ac)
+print(Hccomplete$ac)
+print(Hcaverage$ac)
+print(Hcward$ac)
+```
+From the above results the best value we got is 0.904. Ploting the agnes using ward method and cuttung the Dendrogram. we will take k =4 by observing the distance
+```{r}
+pltree(Hcward, cex = 0.6, hand = -1, main = "Dendrogram of agnes ward")
+```
+Hierarchical clustering using ward method.
+```{r}
+hc1 <- hclust(d, method = "ward.D2")
+subgroup <- cutree(hc1, k =4)
+table(subgroup)
+datafram <- as.data.frame(cbind(Normalize,subgroup))
+#the results in scatter plot.
+fviz_cluster(list(data = Normalize,cluster=subgroup))
+```
+```{r}
+datacereals <-Cereals
+datacereals.omi <- na.omit(datacereals)
+clust <- cbind(datacereals.omi, subgroup)
+clust[clust$subgroup==1,]
+clust[clust$subgroup==2,]
+clust[clust$subgroup==3,]
+clust[clust$subgroup==4,]
+```
+calculating the mean ratings to determine the cluster cereals
+```{r}
+mean(clust[clust$subgroup==1,"rating"])
+mean(clust[clust$subgroup==2,"rating"])
+mean(clust[clust$subgroup==3,"rating"])
+mean(clust[clust$subgroup==4,"rating"])
+```
+from the above results we can clearly that the mean rating is high for subgroup 1. 
